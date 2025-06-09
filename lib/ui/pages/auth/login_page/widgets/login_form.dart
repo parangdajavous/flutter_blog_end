@@ -16,39 +16,39 @@ class LoginForm extends ConsumerWidget {
     //Logger().d(model);
 
     return Form(
-        child: Column(
-      children: [
-        CustomAuthTextFormField(
-          title: "Username",
-          errorText: model.usernameError,
-          onChanged: (value) {
-            fm.username(value);
-          },
-        ),
-        const SizedBox(height: mediumGap),
-        CustomAuthTextFormField(
-          title: "Password",
-          errorText: model.passwordError,
-          onChanged: (value) {
-            fm.password(value);
-          },
-          obscureText: true,
-        ),
-        const SizedBox(height: largeGap),
-        CustomElevatedButton(
-          text: "로그인",
-          click: () {
-            ref.read(sessionProvider.notifier).login(model.username, model.password);
-            Navigator.popAndPushNamed(context, "/post/list");
-          },
-        ),
-        CustomTextButton(
-          text: "회원가입 페이지로 이동",
-          click: () {
-            Navigator.pushNamed(context, "/join");
-          },
-        ),
-      ],
-    ));
+      child: Column(
+        children: [
+          CustomAuthTextFormField(
+            title: "Username",
+            errorText: model.usernameError,
+            onChanged: (value) {
+              fm.username(value);
+            },
+          ),
+          const SizedBox(height: mediumGap),
+          CustomAuthTextFormField(
+            title: "Password",
+            errorText: model.passwordError,
+            obscureText: true,
+            onChanged: (value) {
+              fm.password(value);
+            },
+          ),
+          const SizedBox(height: largeGap),
+          CustomElevatedButton(
+            text: "로그인",
+            click: () {
+              ref.read(sessionProvider.notifier).login(model.username, model.password);
+            },
+          ),
+          CustomTextButton(
+            text: "회원가입 페이지로 이동",
+            click: () {
+              Navigator.pushNamed(context, "/join");
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

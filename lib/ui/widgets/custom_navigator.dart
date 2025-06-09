@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CustomNavigation extends ConsumerWidget {
   final scaffoldKey;
-  const CustomNavigation(this.scaffoldKey, {Key? key}) : super(key: key);
+
+  const CustomNavigation(this.scaffoldKey);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

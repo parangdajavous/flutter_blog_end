@@ -8,7 +8,10 @@ class LoginBody extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
-        children: [const CustomLogo("Blog"), LoginForm()],
+        children: [
+          const CustomLogo("Blog"),
+          LoginForm(),
+        ],
       ),
     );
   }

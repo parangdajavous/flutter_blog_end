@@ -22,7 +22,7 @@ class SessionGVM extends Notifier<SessionModel> {
 
   @override
   SessionModel build() {
-    return SessionModel(); // user 객체는 null, isLogin은 false로 초기화
+    return SessionModel();
   }
 
   Future<void> join(String username, String email, String password) async {
@@ -69,13 +69,13 @@ class SessionGVM extends Notifier<SessionModel> {
     // 3. 파싱
     User user = User.fromMap(body["response"]);
 
-    // 4. 토큰을 디바이스 저장
+    // 4. 토큰을 디바이스 저장 (앱을 다시 시작할때, 자동 로그인하려고)
     await secureStorage.write(key: "accessToken", value: user.accessToken);
 
     // 5. 세션모델 갱신
     state = SessionModel(user: user, isLogin: true);
 
-    // 6. dio의 header에 토큰 세팅 (Bearer ~~~ : 프로토콜 / 이미 붙어 있음)
+    // 6. dio의 header에 토큰 세팅 (Bearer 이거 붙어 있음)
     dio.options.headers["Authorization"] = user.accessToken;
 
     // 7. 게시글 목록 페이지 이동
@@ -83,24 +83,23 @@ class SessionGVM extends Notifier<SessionModel> {
   }
 
   Future<void> logout() async {
-    // 1. Token 디바이스 제거
+    // 1. 토큰 디바이스 제거
     await secureStorage.delete(key: "accessToken");
 
-    // 2. 세션 모델 초기화
+    // 2. 세션모델 초기화
     state = SessionModel();
 
     // 3. dio 세팅 제거
     dio.options.headers["Authorization"] = "";
 
-    // 4. 로그인 페이지로 이동
+    // 4. login 페이지 이동
     scaffoldKey.currentState!.openEndDrawer();
-    Navigator.pushNamed(mContext, '/login');
+    Navigator.pushNamed(mContext, "/login");
   }
 }
 
 /// 3. 창고 데이터 타입 (불변 아님)
 class SessionModel {
-  // 필드로 관리하던 것을 객체로 변경
   User? user;
   bool? isLogin;
 

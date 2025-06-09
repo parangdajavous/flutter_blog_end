@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 1. 창고 관리자
 final loginProvider = NotifierProvider<LoginFM, LoginModel>(() {
+  // 의존하는 VM
   return LoginFM();
 });
 

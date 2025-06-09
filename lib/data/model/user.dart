@@ -1,5 +1,3 @@
-// 정보 더 필요하면 채워넣으면 됨
-
 class User {
   int? id;
   String? username;
