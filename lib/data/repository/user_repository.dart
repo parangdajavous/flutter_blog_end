@@ -28,19 +28,9 @@ class UserRepository {
     };
 
     // 2. 통신
-    Response response = await dio.post("/login", data: requestBody); // Response<T> 타입
-    Map<String, dynamic> responseBody = response.data; // final 사용 안 하고 타입 정확하게 명시하기
-    Logger().d(responseBody);
+    Response response = await dio.post("/login", data: requestBody);
+    Map<String, dynamic> responseBody = response.data;
 
-    // 3. Header에서 Token 꺼내기 (body만 보내므로 / record 사용하면 Header랑 같이 보낼 수 있음)
-    String accessToken = "";
-    try {
-      accessToken = response.headers["Authorization"]![0]; // null이 절대 아니다
-      responseBody["response"]["accessToken"] = accessToken;
-    } catch (e) {
-      // null이면 accessToken은 비어있음
-    }
-    Logger().d(responseBody);
-    return responseBody; // responseBody 안에 정보가 다 있다
+    return responseBody;
   }
 }

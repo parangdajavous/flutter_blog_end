@@ -5,6 +5,7 @@ import 'package:flutter_blog/data/repository/user_repository.dart';
 import 'package:flutter_blog/main.dart';
 import 'package:flutter_blog/ui/pages/auth/join_page/join_fm.dart';
 import 'package:flutter_blog/ui/pages/auth/login_page/login_fm.dart';
+import 'package:flutter_blog/ui/pages/post/list_page/post_list_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
@@ -74,14 +75,27 @@ class SessionGVM extends Notifier<SessionModel> {
     // 5. 세션모델 갱신
     state = SessionModel(user: user, isLogin: true);
 
-    // 5. dio의 header에 토큰 세팅
+    // 6. dio의 header에 토큰 세팅 (Bearer ~~~ : 프로토콜 / 이미 붙어 있음)
     dio.options.headers["Authorization"] = user.accessToken;
 
-    // 6. 게시글 목록 페이지 이동
+    // 7. 게시글 목록 페이지 이동
     Navigator.pushNamed(mContext, "/post/list");
   }
 
-  Future<void> logout() async {}
+  Future<void> logout() async {
+    // 1. Token 디바이스 제거
+    await secureStorage.delete(key: "accessToken");
+
+    // 2. 세션 모델 초기화
+    state = SessionModel();
+
+    // 3. dio 세팅 제거
+    dio.options.headers["Authorization"] = "";
+
+    // 4. 로그인 페이지로 이동
+    scaffoldKey.currentState!.openEndDrawer();
+    Navigator.pushNamed(mContext, '/login');
+  }
 }
 
 /// 3. 창고 데이터 타입 (불변 아님)
