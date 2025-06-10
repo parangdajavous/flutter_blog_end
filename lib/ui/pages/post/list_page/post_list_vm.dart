@@ -3,19 +3,29 @@ import 'package:flutter_blog/data/model/post.dart';
 import 'package:flutter_blog/data/repository/post_repository.dart';
 import 'package:flutter_blog/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 /// 1. 창고 관리자
-final postListProvider = NotifierProvider<PostListVM, PostListModel?>(() {
+final postListProvider = AutoDisposeNotifierProvider<PostListVM, PostListModel?>(() {
   return PostListVM();
 });
 
 /// 2. 창고 (상태가 변경되어도, 화면 갱신 안함 - watch 하지마)
-class PostListVM extends Notifier<PostListModel?> {
+class PostListVM extends AutoDisposeNotifier<PostListModel?> {
   final mContext = navigatorKey.currentContext!;
+  final refreshCtrl = RefreshController(); // 상태로 등록
 
   @override
   PostListModel? build() {
     init();
+
+    // 2. VM 파괴
+    ref.onDispose(() {
+      refreshCtrl.dispose();
+      Logger().d("PostListModel 파괴됨");
+    });
+
     return null;
   }
 
@@ -70,6 +80,38 @@ class PostListVM extends Notifier<PostListModel?> {
       return;
     }
     state = PostListModel.fromMap(body["response"]);
+
+    refreshCtrl.refreshCompleted(); // 마지막 트랜잭션
+  }
+
+  Future<void> nextList() async {
+    // 1. 초기화 -> 0페이지에 1페이지를 uppand
+    PostListModel prevModel = state!;
+
+    // 마지막 페이지일 때
+    if (prevModel.isLast) {
+      await Future.delayed(Duration(milliseconds: 500)); // 없으면 끌어올릴 때 도는게 보이지 않음 - 되고있는지 알 수 없다
+      refreshCtrl.loadComplete();
+      return;
+    }
+
+    // 마지막 페이지가 아니면
+    Map<String, dynamic> body = await PostRepository()
+        .getList(page: prevModel.pageNumber + 1); // prevModel.pageNumber -> 현재 페이지  +1을 해줘야 다음 페이지로 넘어간다
+    if (!body["success"]) {
+      ScaffoldMessenger.of(mContext!).showSnackBar(
+        SnackBar(content: Text("게시글 로드 실패 : ${body["errorMessage"]}")),
+      );
+      refreshCtrl.loadComplete();
+      return;
+    }
+
+    // 파싱
+    PostListModel nextModel = PostListModel.fromMap(body["response"]);
+
+    // state에 갱신 (prevModel과 nextModel을 합친다)
+    state = nextModel.copyWith(posts: [...prevModel.posts, ...nextModel.posts]);
+    refreshCtrl.loadComplete();
   }
 }
 
