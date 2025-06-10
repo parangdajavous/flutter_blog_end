@@ -25,6 +25,42 @@ class SessionGVM extends Notifier<SessionModel> {
     return SessionModel();
   }
 
+  Future<void> autoLogin() async {
+    // 1. 토큰 가져오기
+    String? accessToken = await secureStorage.read(key: "accessToken");
+
+    // 2. 토큰 null 체크
+    if (accessToken == null) {
+      Navigator.pushReplacementNamed(mContext, "/login"); // 스플래쉬 페이지 날리고 가야함
+      return;
+    }
+
+    // 3. 통신
+    Map<String, dynamic> body = await UserRepository().autoLogin(accessToken); // 코드상 accessToken은 절대 null일 수 없다
+
+    // 4. 성공여부 확인
+    if (!body["success"]) {
+      ScaffoldMessenger.of(mContext).showSnackBar(
+        SnackBar(content: Text("${body["errorMessage"]}")),
+      );
+      Navigator.pushReplacementNamed(mContext, "/login");
+      return;
+    }
+
+    // 5. 파싱
+    User user = User.fromMap(body["response"]);
+    user.accessToken = accessToken;
+
+    // 6. 세션모델 갱신
+    state = SessionModel(user: user, isLogin: true);
+
+    // 7. dio의 header에 토큰 세팅
+    dio.options.headers["Authorization"] = user.accessToken;
+
+    // 8. 게시글 목록 페이지 이동
+    Navigator.pushNamed(mContext, "/post/list");
+  }
+
   Future<void> join(String username, String email, String password) async {
     Logger().d("username : ${username}, email : ${email}, password : ${password}");
     bool isValid = ref.read(joinProvider.notifier).validate();

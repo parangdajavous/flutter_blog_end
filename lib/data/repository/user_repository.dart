@@ -29,4 +29,14 @@ class UserRepository {
 
     return responseBody;
   }
+
+  Future<Map<String, dynamic>> autoLogin(String accessToken) async {
+    // 통신 - header에 token 넣기
+    Response response = await dio.post("/auto/login",
+        options: Options(
+          headers: {"Authorization": accessToken},
+        ));
+    Map<String, dynamic> responseBody = response.data;
+    return responseBody;
+  }
 }
