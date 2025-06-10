@@ -19,6 +19,17 @@ class PostListVM extends Notifier<PostListModel?> {
     return null;
   }
 
+  void notifyUpdate(Post post) {
+    List<Post> nextPosts = state!.posts.map((p) {
+      if (p.id == post.id) {
+        return post; // 바뀐 post
+      } else {
+        return p; // 기존 post
+      }
+    }).toList();
+    state = state!.copyWith(posts: nextPosts);
+  }
+
   void notifyDeleteOne(int postId) {
     PostListModel model = state!;
 
