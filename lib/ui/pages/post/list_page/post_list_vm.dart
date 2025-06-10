@@ -27,6 +27,29 @@ class PostListVM extends Notifier<PostListModel?> {
     state = state!.copyWith(posts: model.posts);
   }
 
+  // 트랜잭션 - 일의 최소 단위
+  Future<void> write(String title, String content) async {
+    // 1. postRepository 함수 호출
+    Map<String, dynamic> body = await PostRepository().write(title, content);
+    // 2. 성공 여부 확인
+    if (!body["success"]) {
+      ScaffoldMessenger.of(mContext!).showSnackBar(
+        SnackBar(content: Text("게시글 쓰기 실패 : ${body["errorMessage"]}")),
+      );
+      return;
+    }
+
+    // 3. 파싱 (post로 파싱)
+    Post post = Post.fromMap(body["response"]);
+
+    // 4. List 상태 갱신
+    List<Post> nextPosts = [post, ...state!.posts]; // ... -> 전개연산자
+    state = state!.copyWith(posts: nextPosts);
+
+    // 5. 글쓰기 화면 pop
+    Navigator.pop(mContext);
+  }
+
   Future<void> init({int page = 0}) async {
     Map<String, dynamic> body = await PostRepository().getList(page: page);
     if (!body["success"]) {
